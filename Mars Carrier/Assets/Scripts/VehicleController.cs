@@ -8,6 +8,7 @@ public class VehicleController : MonoBehaviour
     public Rigidbody sphereRB;
     public Rigidbody carRB;
     public LayerMask groundLayer;
+    public float smoothAngleTime = 0.5f ;
 
     public float moveSpeed;
     public float revMulti;
@@ -15,6 +16,7 @@ public class VehicleController : MonoBehaviour
     public float airGravityMulti = 9.8f;
     public float airDrag;
     public float groundDrag;
+    public Joystick leftStick;
 
 
     private float moveInput;
@@ -35,7 +37,7 @@ public class VehicleController : MonoBehaviour
         //gets inputs
         PlayerInput();
 
-        float newRotation = turnInput * turnSpeed * Time.deltaTime * Input.GetAxisRaw("Vertical");
+        float newRotation = turnInput * turnSpeed * Time.deltaTime * moveInput;
         
         //speed for forward or reverse
         moveInput *= moveInput > 0 ? moveSpeed : moveSpeed / revMulti;
@@ -46,7 +48,8 @@ public class VehicleController : MonoBehaviour
         RaycastHit hit;
         grounded = Physics.Raycast(transform.position, -transform.up,out hit, 1f, groundLayer);
         
-        transform.rotation = Quaternion.FromToRotation(transform.up, hit.normal) * transform.rotation;
+        Quaternion toRotateTo = Quaternion.FromToRotation(transform.up, hit.normal) * transform.rotation;
+        transform.rotation = Quaternion.Slerp(transform.rotation, toRotateTo, smoothAngleTime *Time.deltaTime);
 
         if (grounded)
         {
@@ -61,8 +64,11 @@ public class VehicleController : MonoBehaviour
     //Inputs
     public void PlayerInput()
     {
-        moveInput = Input.GetAxisRaw("Vertical");
-        turnInput = Input.GetAxisRaw("Horizontal");
+        // moveInput = Input.GetAxisRaw("Vertical");
+        // turnInput = Input.GetAxisRaw("Horizontal");
+        
+        moveInput = leftStick.Vertical;
+        turnInput = leftStick.Horizontal;
         
         // Debug.Log(moveInput);
     }
