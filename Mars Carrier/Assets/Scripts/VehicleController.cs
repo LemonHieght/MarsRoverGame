@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class VehicleController : MonoBehaviour
@@ -8,7 +9,9 @@ public class VehicleController : MonoBehaviour
     public Rigidbody sphereRB;
     public Rigidbody carRB;
     public LayerMask groundLayer;
-    public float smoothAngleTime = 0.5f ;
+    public float smoothAngleTime = 0.5f;
+    public float timer = 10f;
+    public float tempTimer;
 
     public float moveSpeed;
     public float revMulti;
@@ -33,7 +36,7 @@ public class VehicleController : MonoBehaviour
     {
         //set Vehicle position to controller
         transform.position = sphereRB.transform.position;
-        
+
         //gets inputs
         PlayerInput();
 
@@ -54,10 +57,22 @@ public class VehicleController : MonoBehaviour
         if (grounded)
         {
             sphereRB.drag = groundDrag;
+            tempTimer = timer;
         }
         else
         {
             sphereRB.drag = airDrag;
+            if (!grounded && tempTimer > 0f)
+            {
+                tempTimer -= Time.deltaTime;
+            }
+            else if (tempTimer <= 0f)
+            {
+                Debug.Log(transform.rotation.eulerAngles);
+                transform.rotation =quaternion.identity;
+                Debug.Log(transform.rotation.eulerAngles);
+                tempTimer = timer;
+            }
         }
     }
 
@@ -85,7 +100,6 @@ public class VehicleController : MonoBehaviour
         {
             sphereRB.AddForce(transform.up * -airGravityMulti);
         }
-        
         carRB.MoveRotation(transform.rotation);
     }
 }

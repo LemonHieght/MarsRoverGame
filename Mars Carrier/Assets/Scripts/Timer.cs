@@ -10,12 +10,16 @@ public class Timer : MonoBehaviour
     private float timer;
     public float secs = 1f;
     public FloatData time;
+    public FloatData timeFast;
     private bool start;
     public UnityEvent timerUpdateEvent;
     
     
     [SerializeField]
-    private TextMeshProUGUI textMeshPro;
+    private TextMeshProUGUI currentTime;
+    [SerializeField]
+    private TextMeshProUGUI fastestTime;
+    public TextMeshProUGUI fastestTimeTitle;
 
     private WaitForSeconds _delaySecondsObj;
 
@@ -23,11 +27,14 @@ public class Timer : MonoBehaviour
     {
         time.value = 0f;
         start = false;
+        
+        fastestTimeTitle.text = $"Best Time: {PlayerPrefs.GetFloat("HiScore")}";
     }
 
     private void Update()
     {
-        textMeshPro.text = time.value.ToString("0.00");
+        currentTime.text = time.value.ToString("0.00");
+
     }
 
     IEnumerator RaceTimer()
@@ -39,9 +46,7 @@ public class Timer : MonoBehaviour
             time.value = Time.time - timer;
             
             timerUpdateEvent.Invoke();
-            
-            Debug.Log(time.value);
-            
+
             yield return _delaySecondsObj;
         }
         
@@ -57,5 +62,15 @@ public class Timer : MonoBehaviour
     public void StopTimer()
     {
         start = false;
+    }
+
+    public void FastestTime()
+    {
+        if (time.value < PlayerPrefs.GetFloat("HiScore", 1000000f))
+        {
+            PlayerPrefs.SetFloat("HiScore",time.value);
+        }
+
+        fastestTime.text = $"Best Time: {PlayerPrefs.GetFloat("HiScore")}";
     }
 }
